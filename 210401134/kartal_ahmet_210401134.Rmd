@@ -1,0 +1,50 @@
+---
+title: 'Proje Rapor : Ahmet Suat Kartal 210401134'
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+---
+
+```{r Managing packages, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Timer set
+start.time <- Sys.time()
+#####################
+
+
+
+# Package manager
+
+packages <- c("data.table", "ggplot2", "ggmap", "maps", "mapdata", "dplyr", "tidyverse", "scales", "lubridate")
+for (package in packages) {
+  if (!requireNamespace(package, quietly = TRUE)) {
+    install.packages(package, repos = "http://cran.us.r-project.org")
+  }
+}
+
+# adding repos parameter in install.packages to bypass "trying to use CRAN without setting a mirror" error.
+
+library(data.table)
+library(ggplot2)
+library(ggmap)
+library(maps)
+library(mapdata)
+library(dplyr)
+library(tidyverse)
+library(scales)
+library(lubridate)
+
+
+#####################
+# Calculate execution time
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+message("[LOG] Managing packages: ", time.taken)
+
+```
+
+
+# Q1 : Problem tanımı
+
+Sigorta şirketimiz, müşteri kazalarının sıklığı nedeniyle istenilen kar hedeflerine ulaşamamaktadır. Kazaların sıklığı; müşterilerin dikkatsizliği, hava durumu ve yol koşulları gibi faktörlerin bir kombinasyonu nedeniyle artmakta, bu da kaza tazminat ödemelerinin artması gibi giderlere yol açarak şirketin karlılığını olumsuz yönde etkilemektedir. İşte bu rapor, şirketin karşılaştığı bu sorunu ele alarak çözmek üzere planlanan stratejiyi detaylandırmaktadır.
