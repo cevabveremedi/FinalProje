@@ -403,9 +403,41 @@ head(accidentsDB, 10)
 
 Veri seti ön işleme işlemleri sonucunda, veri seti analize hazır hale getirilmiştir. Eksik veriler temizlenmiş, sayısal değerler doğru formata dönüştürülmüş ve kategorik değerler faktör tipine dönüştürülmüştür.
 
+# Q5 : Veri mühendisliği 
+
+```{r Adding a new column to the dataset, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Timer set
+start.time <- Sys.time()
+#####################
+
+
+
+# Veri setine yeni sütunu ekleyerek her veri için %20 olasılıkla TRUE ve %80 olasılıkla FALSE değeri atama
+set.seed(123)  # Rastgelelik kontrolü için seed ayarla
+accidentsDB <- accidentsDB %>%
+  mutate(company_loss = sample(c(TRUE, FALSE), n(), replace = TRUE, prob = c(0.2, 0.8)))
+head(accidentsDB, 50)
+
+
+#####################
+# Calculate execution time
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+message("[LOG] Adding a new column to the dataset: ", time.taken)
+
+
+```
+
+**Yeni Sütun Oluşturma**
+
+Şirketin kullanıcı veri tabanına analiz sırasında erişim sağlanamadığı için, bu eksikliği şimdilik kapatması adına, US Accidents veri setine yeni, **sentetik**, bir sütun eklendi. Bu sütun, bir kazanın şirketi etkileyip etkilemediğini gösteren bir değişkendir. [Eklenen verilerin sonucu olarak, veri setindeki kazaların %20'sinin şirketin maddi zarar görmesine neden olduğu gözlemlenmektedir.]{.ul} Gerçek kullanıcı veri tabanı analize hazır hale geldiği zaman bu veri setiyle birleştirilip daha spesifik ve gerçek sonuçlar elde edilebilir.
+
+
 ```{r echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE, results='hide'}
 library(testthat)
 
 source("testQ3.R")
 source("testQ4.R")
+source("testQ5.R")
 ```
