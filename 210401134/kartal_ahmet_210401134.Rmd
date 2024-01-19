@@ -434,10 +434,299 @@ message("[LOG] Adding a new column to the dataset: ", time.taken)
 Şirketin kullanıcı veri tabanına analiz sırasında erişim sağlanamadığı için, bu eksikliği şimdilik kapatması adına, US Accidents veri setine yeni, **sentetik**, bir sütun eklendi. Bu sütun, bir kazanın şirketi etkileyip etkilemediğini gösteren bir değişkendir. [Eklenen verilerin sonucu olarak, veri setindeki kazaların %20'sinin şirketin maddi zarar görmesine neden olduğu gözlemlenmektedir.]{.ul} Gerçek kullanıcı veri tabanı analize hazır hale geldiği zaman bu veri setiyle birleştirilip daha spesifik ve gerçek sonuçlar elde edilebilir.
 
 
+# Q6 : Veri analizi
+
+* **Zamana göre kaza sayısı**
+
+```{r Accidents by Month and by Year, eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Timer set
+start.time <- Sys.time()
+#####################
+
+
+
+# create data frame of months
+mon_df <- accidentsDB %>%
+  select(Start_Time) %>%
+  mutate(month = month(ymd_hms(Start_Time)), 
+          year = year(ymd_hms(Start_Time))) %>%
+  group_by(year, month) %>%
+  summarise(n = length(Start_Time), .groups='keep') %>%
+  data.frame()
+
+mon_df$year <- as.factor(mon_df$year)
+mon_df <- mon_df[!is.na(mon_df$month),]
+x_labels <- min(mon_df$month):max(mon_df$month)
+
+# line plot of nationwide data by month and year
+ggplot(mon_df, aes(x = month, y = n, group = year)) +
+  geom_line(aes(color=year), size = 1) + 
+  labs(title = "Ay ve Yıllara Göre Kaza Sayısı", x = "Ay", y = "Kaza Sayısı") +
+  theme_light() +
+  theme(plot.title = element_text(hjust= 0.5)) + 
+  scale_x_continuous(labels = x_labels, breaks = x_labels, minor_breaks = NULL) + 
+  scale_y_continuous(labels = comma) +
+  scale_color_brewer(palette = "Spectral", name = "Year", guide = guide_legend(reverse = TRUE))
+
+
+
+#####################
+# Calculate execution time
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+message("[LOG] Accidents by Month and by Year: ", time.taken)
+
+```
+
+Grafik incelendiğinde 2020 yılının sonlarında kaza sayısında büyük bir artış olduğu gözlemlenmiştir. Bu tarihten önceki ve sonraki kazalar arasında olan dramatik farka bakılırsa bu artış, bazı veri kaynaklarından aniden daha fazla veri toplanması ve raporlanmasından kaynaklanmış gibi görünüyor. Yine 2020 yılının Temmuz ve Ağustos aylarındaki kaza sayısındaki düşüşün nedeni ise belirsiz; ancak bu durum, o sene etkisini gösteren Covid salgını ve o dönemde daha az insanın yolda olmasıyla ilişkili olabilir.
+
+* 2020 yılında kaza raporlarında ciddi bir artış gözlemlenmiştir.
+* En çok kaza 2022 yılında raporlara geçmiştir.
+
+Analize daha spesifik bir bölge üzerinden *(Maryland)* ve daha dar bir zaman aralığında *(2023 yılından itibaren)* devam edelim.
+
+* **Konuma Göre Kaza Şiddet Grafiği**
+
+```{r Graph of Accidents on MD and Baltimore, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Timer set
+start.time <- Sys.time()
+#####################
+
+
+
+MD_df <- accidentsDB[accidentsDB$State == "MD"& as.Date(accidentsDB$Start_Time) >= as.Date("2023-01-01"),]
+
+# Maryland lat long data frame
+MD_loc <- MD_df %>%
+  select(Severity, Start_Lat, Start_Lng) %>%
+  data.frame()
+
+# accident count
+MDcount <- nrow(MD_loc)
+
+# Baltimore lat long data frame
+balt_loc <- MD_loc[(MD_loc$Start_Lat>39.1977 & MD_loc$Start_Lat<39.3719)&(MD_loc$Start_Lng>(-76.7122) & MD_loc$Start_Lng<(-76.5294)), ]
+
+# create scatterplot of Maryland lat long
+ggplot(MD_loc, aes(x=Start_Lng, y=Start_Lat, col=Severity)) +
+  geom_point(size=1, shape=20) +
+  coord_equal(ratio=1) +
+  labs(title = "Maryland, Ocak 2023", 
+        x = "Boylam (Longitude)", 
+        y = "Enlem (Latitude)",
+        fill = "Severity") + 
+  theme_dark() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_brewer(palette = 'YlOrRd', name = 'Şiddet')
+
+# create scatterplot of Baltimore lat long
+ggplot(balt_loc, aes(x=Start_Lng, y=Start_Lat, col=Severity)) +
+  geom_point(size=1, shape=20) +
+  coord_equal(ratio=1) +
+  labs(title = "Baltimore City, Ocak 2023", 
+        x = "Boylam (Longitude)", 
+        y = "Enlem (Latitude)",
+        fill = "Severity") + 
+  theme_dark() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_brewer(palette = 'YlOrRd', name = 'Şiddet')
+
+
+
+#####################
+# Calculate execution time
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+message("[LOG] Graph of Accidents on MD and Baltimore: ", time.taken)
+
+```
+
+Bu görselleme, **Maryland** eyaletindeki kazaların konumlarını incelemekte olup, kazaların şiddet seviyelerini renk kullanarak göstermektedir. İlk grafik eyaletin genelini kapsarken, ikinci grafik genel olarak **Baltimore City**'nin konumuna odaklanmaktadır. Beklendiği gibi, daha ciddi kazalar genellikle ana otoyollarda meydana gelmektedir; bu durum, muhtemelen araçların daha yüksek hız yapmasından dolayıdır. Baltimore City içerisinde ise, çoğu kaza genellikle şehre giden ve şehirden çıkan otoyollar üzerinde meydana gelmektedir.
+
+**Maryland**, nispeten küçük bir eyalet olmasına rağmen, bu bölgede yüksek sayıda kaza raporu ile karşılaşılmıştır. Bu durum, muhtemelen Maryland'in **Washington DC**'ye olan yakınlığı ve eyaleti geçen birçok karayolun etkisiyle ilişkilendirilebilir. **Maryland** içinde gerçekleşen kazaların çoğu 2. seviyede olup, genellikle soğuk, bulutlu, hafif yağmurlu veya fırtınalı hava koşullarında meydana gelmektedir. Daha ciddi kazalar ise genellikle daha yüksek hız sınırlarına sahip otoyollar ve yollar üzerinde gerçekleşmektedir.
+
+```{r Graph of Company Loss on MD and Baltimore, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Timer set
+start.time <- Sys.time()
+#####################
+
+
+
+# Maryland lat long data frame (company_loss = true)
+MD_loc <- MD_df %>%
+  filter(company_loss == TRUE) %>%
+  select(Severity, Start_Lat, Start_Lng) %>%
+  data.frame()
+
+# accident count
+MDcustomerCount <- nrow(MD_loc)
+
+# Baltimore lat long data frame (company_loss = true)
+balt_loc <- MD_loc[(MD_loc$Start_Lat>39.1977 & MD_loc$Start_Lat<39.3719)&(MD_loc$Start_Lng>(-76.7122) & MD_loc$Start_Lng<(-76.5294)), ]
+
+# create scatterplot of Maryland lat long (company_loss = true)
+ggplot(MD_loc, aes(x=Start_Lng, y=Start_Lat, col=Severity)) +
+  geom_point(size=1, shape=20) +
+  coord_equal(ratio=1) +
+  labs(title = "Maryland, Müşteri Kazaları, Ocak 2023", 
+        x = "Boylam (Longitude)", 
+        y = "Enlem (Latitude)",
+        fill = "Şiddet") + 
+  theme_dark() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_brewer(palette = 'YlOrRd', name = 'Şiddet')
+
+# create scatterplot of Baltimore lat long (company_loss)
+ggplot(balt_loc, aes(x=Start_Lng, y=Start_Lat, col=Severity)) +
+  geom_point(size=1, shape=20) +
+  coord_equal(ratio=1) +
+  labs(title = "Baltimore City, Müşteri Kazaları, Ocak 2023", 
+        x = "Boylam (Longitude)", 
+        y = "Enlem (Latitude)",
+        fill = "Şiddet") + 
+  theme_dark() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_brewer(palette = 'YlOrRd', name = 'Şiddet')
+
+
+
+#####################
+# Calculate execution time
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+message("[LOG] Graph of Company Loss on MD and Baltimore: ", time.taken)
+
+```
+
+Müşteri kazaları, şirket tarafından sigortalanmış araçların karıştığı kazalardır. Maryland'de her yıl yaklaşık `r MDcount` kaza meydana gelmektedir. Bu kazaların yaklaşık %`r round((MDcustomerCount/MDcount) * 100)` kadarı müşteri kazalarıdır. Bu durum ciddi bir zarara neden olmaktadır ve müşteri kazalarının oranını azaltmak şirket giderlerinde ciddi bir azalmaya sebep olacaktır.
+
+* **Belirleyici Yol Özelliklerine Göre Kaza Grafiği**
+
+```{r Graph of Traffic Categories, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Timer set
+start.time <- Sys.time()
+#####################
+
+
+
+filtered_data <- accidentsDB %>%
+  select(Junction, Bump, Crossing, Stop, Traffic_Calming, Traffic_Signal)
+
+# Her bir özelliğin yüzde oranlarını hesaplayın
+percentage_true <- colMeans(filtered_data, na.rm = TRUE)
+
+total_counts <- colSums(filtered_data, na.rm = TRUE)
+
+# Sonuçları veri çerçevesine dönüştürün
+result_df <- data.frame(
+  Feature = names(percentage_true),
+  Percentage_True = percentage_true,
+  Total_Count = total_counts
+)
+
+# Grafik oluşturun
+ggplot(result_df, aes(x = Feature, y = Percentage_True)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+  geom_text(aes(label = paste0(sprintf("%.2f", Percentage_True * 100), "%")),
+            vjust = -0.5, color = "black", size = 3) +  # Yüzde değerlerini ekleyin
+  geom_text(aes(label = paste0("[", Total_Count, "]")),
+            vjust = 1.5, color = "black", size = 3) +  # Toplam sayıları ekleyin
+  labs(title = "Yol Özelliklerinin Trafik Kazalarına Oranı",
+       x = "Belirleyici Özellikler",
+       y = "Kaza Oranı") +
+  theme_minimal()
+
+
+
+#####################
+# Calculate execution time
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+message("[LOG] Graph of Traffic Categories: ", time.taken)
+
+```
+
+Bu grafikten çok önemli bazı çıkarımlar yapılabilir.
+
+* Yaya Geçitleri Önemli Bir Risk Bölgesidir:
+
+  + Yaya geçitleri, tüm kazaların %12'siyle ilişkilidir. Bu, özellikle yaya geçitlerinin trafik güvenliği açısından önemli bir risk bölgesi olduğunu gösterir.
+
+* Trafik Sinyalleri ve Kavşaklar Sıkça Kazaların Olduğu Yerlerdir:
+
+  + Trafik sinyalleri ve kavşaklar, sırasıyla %15 ve %7 ile kazaların sıkça gerçekleştiği bölgelerdir. Bu alanlarda güvenliği artırmak için ek tedbirler alınması gerekebilir.
+
+* Dur (Stop) İşareti ve Trafik Sakinleştirme Alanlarında Kazaların Oranı Düşük:
+
+  + Dur işaretinin kazalarda %3 ile ilişkilendirilmiş olması, sinyaller ve kavşaklar gibi diğer trafik kontrol noktalarına göre daha az risk içerdiğini gösterir. Benzer şekilde trafik sakinleştirme bölgelerinin kazalarla sadece %0.10 oranında bağlantılı olması da bu tür bölgelerin genellikle daha güvenli olduğunu gösterir.
+
+* Tümseklerin (Bump) Bulunduğu Bölgelerde Düşük Kaza Miktarı:
+
+  + Tümseklerin %0.05'lik düşük oranı, bu tür işaretlerin genellikle kazalarla çok az ilişkili olduğunu, veya gerçekten de kazaları azalttığını gösterir.
+
+**Genel Değerlendirme ve Öneriler:**
+
+Trafik güvenliği önlemleri, özellikle yaya geçitleri, trafik sinyalleri ve kavşaklarda yoğunlaştırılmalıdır.
+Kazaların az olduğu bölgelerde dahi, önleyici tedbirlerin alınması ve sürücülerin bilinçlendirilmesi önemlidir.
+Müşterilerin, özellikle yoğun kazaların olduğu bölgelerde uyarılması gerekmektedir.
+Bu çıkarımlar, projedeki trafik güvenliği önlemlerinin etkili bir şekilde planlanması ve uygulanması için rehberlik edebilir. Ancak, yerel koşullar ve spesifik durumlar göz önüne alınarak daha ayrıntılı bir analiz yapmak, ve bu verileri diğer verilerle karşılaştırmak her zaman faydalı olacaktır. Yine de şimdilik bu veriler üzerinde tatmin edici çıkarımlar yapılmıştır.
+
+* **Yüzdelik Kaza - Saat Grafiği**
+
+```{r Hourly Distribution of Accidents, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Timer set
+start.time <- Sys.time()
+#####################
+
+
+
+sample_data <- data.frame(AccidentTime = accidentsDB$Start_Time)
+
+# Saat sütununu POSIXct türüne dönüştürün
+sample_data$AccidentTime <- as.POSIXct(sample_data$AccidentTime, format="%H:%M:%S", tz="GMT")
+
+# Saat sütunundan saat bilgisini çıkarın ve Hour adında yeni bir sütun oluşturun
+sample_data$Hour <- format(sample_data$AccidentTime, format="%H")
+
+# Toplam kaza sayısını ve saatlik yüzde oranlarını hesaplayın
+total_accidents <- nrow(sample_data)
+hourly_percentage <- count(sample_data, Hour) %>%
+  mutate(Percentage = n / total_accidents * 100)
+
+# Grafik oluşturun
+ggplot(hourly_percentage, aes(x = Hour, y = Percentage)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+  geom_text(aes(label = paste0(sprintf("%.1f", Percentage), "%")),
+            vjust = -0.5, color = "black", size = 3) +  # Yüzde değerlerini ekleyin
+  labs(title = "Kazaların Saatlere Dağılımı",
+       x = "Saat",
+       y = "Kaza Oranı") +
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +  # Y ekseni yüzde formatında gösterilsin
+  theme_minimal()
+
+
+
+#####################
+# Calculate execution time
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+message("[LOG] Hourly Distribution of Accidents: ", time.taken)
+
+```
+
+Gün içinde en yüksek kaza sıklığı, özellikle saat 7-8 arası ve 15-17 arasında gözlemlenmiştir. Bu saat dilimlerinde toplam kaza sayısının yüksek olmasının, yaklaşık olarak iş saatlerine denk gelmesi dikkat çekicidir. Bu saatlerde trafik yoğunluğunun artması, sürücülerin aceleyle hareket etmelerine ve kaza riskini artırmalarına neden olabilir. Proje kapsamında müşterilerin uyarılmasını gerektirecek veriler analiz edilirken bu grafikten de çıkarımlar yapılabilir.
+
+
 ```{r echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE, results='hide'}
 library(testthat)
 
 source("testQ3.R")
 source("testQ4.R")
 source("testQ5.R")
+source("testQ6.R")
 ```
