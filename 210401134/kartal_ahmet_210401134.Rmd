@@ -337,8 +337,75 @@ Daha herhangi bir sonuca varmak için çok erken olsa da, elimizdeki verilerin y
 ```
 
 
+# Q4 : Veri seti ön işlemesi
+
+**Analize Dahil Edilmeyen Veriler**
+
+Elimizdeki veri setinin sahip olduğu sütunlar aşağıdaki gibidir:
+
+`r data.frame(Columns)`
+
+Görüldüğü üzere buradaki özelliklerin birçoğunun projeye gerçekçi bir katkı sağlaması mümkün değildir ve bu sütunlar veri analizine dahil edilmeyecektir. Aşağıda birkaçı nedenleriyle birlikte listelenmiştir:
+
+* **ID**, her bir kazayı temsil eden özgün bir değer olduğu için ve kaza şiddeti hakkında anlamlı bilgiler sağlamadığı için çıkartılmıştır.
+* **Source**, kaza raporunu yapan şirketi veya grubu belirtir, ancak kaza şiddetini bulmak için anlamlı değildir, bu nedenle çıkartılmıştır.
+* **End_Lat** ve **End_Lng** çoğunlukla null değerleri içeriyordur veya anlamlı değildir, bu nedenle çıkartılmıştır.
+* **Description**, temel olarak kazaların şeklini özetler, her kaza için farklıdır ve analizi yapılamaz, bu nedenle çıkartılmıştır.
+* **Weather_Timestamp**, hava koşullarının ne zaman rapor edildiğini belirtir ancak kaza şiddetini belirlemede anlamlı değildir, bu nedenle çıkartılmıştır.
+* **Wind_direction**, kaza rapor edildiğindeki rüzgarın genel yönünü gösterir ancak bu  analiz için anlamlı değildir, bu nedenle çıkartılmıştır.
+* **Civil_Twilight, Nautical_Twilight, Astronomical_Twilight** ve **Sunrise_Sunset**, kazaların meydana geldiği günün saatini açıklamak için kullanılan yöntemlerdir. Bu değerler üzerinden analiz yapmak mümkün olsa da saati ve tarihi gösteren başka bir veri olduğu için bu 4 sütun gereksiz bulunmuş, bu nedenle çıkartılmıştır.
+
+**Veri Setinden Silinen Veriler**
+
+Veri Seti kalite analizi yapılırken toplam `r count_empty_street + count_empty_city + count_empty_weather` tane satırda eksik veri tespit edilmişti; bu satırlar temizlendi.
+
+```{r Converting data types and deleting empty rows, echo=FALSE, message=FALSE, warning=FALSE}
+
+# Timer set
+start.time <- Sys.time()
+#####################
+
+
+accidentsDB <- accidentsDB[accidentsDB$Weather_Condition != "", ]
+accidentsDB <- accidentsDB[accidentsDB$City != "", ]
+accidentsDB <- accidentsDB[accidentsDB$Street != "", ]
+
+accidentsDB$Severity <- as.factor(accidentsDB$Severity)
+accidentsDB$State <- as.factor(accidentsDB$State)
+accidentsDB$City <- as.factor(accidentsDB$City)
+accidentsDB$Weather_Condition <- as.factor(accidentsDB$Weather_Condition)
+
+
+
+#####################
+# Calculate execution time
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+message("[LOG] Converting data types: ", time.taken)
+
+```
+
+**Değiştirilen Veri Tipleri**
+
+Faktör (factor) tipi: Sınırlı sayıda farklı değere sahip kategorik değişkenler için kullanılır. Bu, modellerin kategorik değişkenleri daha iyi anlamasına ve daha doğru tahminler yapmasına olanak tanır. Bu nedenle bazı verilerin tipi *Factor* olarak değiştirilmiştir.
+
+* **Severity**: Sınırlı sayıda farklı değere sahip olduğu için *int* yerine *factor* olarak değiştirildi.
+* **State** ve **City**: Eyalet adları kategorik değişken olduğu için *chr* yerine *factor* olarak değiştirildi.
+* **Weather_Condition**: Hava durumu değişkeni kategorik olduğu için *chr* yerine *factor* olarak değiştirildi.
+
+Bu değişimlerden sonra veri seti aşağıdaki gibidir:
+
+```{r Showing the revamped dataset, echo=FALSE, message=FALSE, warning=FALSE}
+head(accidentsDB, 10)
+```
+
+**Sonuç**
+
+Veri seti ön işleme işlemleri sonucunda, veri seti analize hazır hale getirilmiştir. Eksik veriler temizlenmiş, sayısal değerler doğru formata dönüştürülmüş ve kategorik değerler faktör tipine dönüştürülmüştür.
+
 ```{r echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE, results='hide'}
 library(testthat)
 
 source("testQ3.R")
+source("testQ4.R")
 ```
