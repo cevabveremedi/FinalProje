@@ -48,3 +48,15 @@ message("[LOG] Managing packages: ", time.taken)
 # Q1 : Problem tanımı
 
 Sigorta şirketimiz, müşteri kazalarının sıklığı nedeniyle istenilen kar hedeflerine ulaşamamaktadır. Kazaların sıklığı; müşterilerin dikkatsizliği, hava durumu ve yol koşulları gibi faktörlerin bir kombinasyonu nedeniyle artmakta, bu da kaza tazminat ödemelerinin artması gibi giderlere yol açarak şirketin karlılığını olumsuz yönde etkilemektedir. İşte bu rapor, şirketin karşılaştığı bu sorunu ele alarak çözmek üzere planlanan stratejiyi detaylandırmaktadır.
+
+# Q2 : Proje Amacı
+
+Bu proje, [US Accidents (2016 - 2023)](https://www.kaggle.com/datasets/sobhanmoosavi/us-accidents) veri setini kullanarak kazaların sıklıkla gerçekleştiği bölgeleri belirlemeyi ve bu bölgeleri müşterilerimize bildirerek, sürücülerin bu bölgelerde daha dikkatli olmaları ve kaza riskini azaltmalarını sağlamayı amaçlamaktadır. Bu projenin başarısı, şirketin karlılığını artırmanın yanı sıra, müşteri memnuniyetini ve trafik güvenliğini artırarak toplumsal fayda sağlayacaktır. Analizlerimizin, şirketin stratejik karar alma süreçlerine nasıl etki edeceğini ayrıntılı bir şekilde açıklayan bu rapor, projenin temel hedef ve etkilerini ortaya koymaktadır.
+
+Proje kapsamında, aşağıdaki analiz etaplarının gerçekleştirilmesi planlanmaktadır:
+
+* Kaza sıklığını **zamana göre** analiz etmek için, zaman seri analizi kullanılarak kazaların belirli zamanlarda daha yaygın olup olmadığı belirlenecektir.
+* Kaza sıklığını **yere göre** analiz etmek için, coğrafi istatistikler kullanılarak kazaların belirli bölgelerde daha yaygın olup olmadığı belirlenecektir.
+* Kaza nedenlerini analiz etmek için, **regresyon analizi** kullanılarak kazaların en yaygın nedenlerinin neler olduğu belirlenecektir.
+
+Projenin sonucunda elde edilecek sonuçlar, uygulamanın geliştirilmesinde önemli bir rol oynayacaktır. Örneğin, kazaların belirli zamanlarda veya bölgelerde daha yaygın olduğu belirlenirse, uygulama bu zamanlarda veya bölgelerde sürücüleri daha fazla uyaracak şekilde geliştirilebilir. Kazaların en yaygın nedenlerinin belirlenmesi de, uygulamanın bu nedenleri azaltmak için nasıl uyarlanabileceğinin belirlenmesine yardımcı olacaktır.
