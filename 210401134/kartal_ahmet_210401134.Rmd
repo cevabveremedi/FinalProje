@@ -721,8 +721,41 @@ message("[LOG] Hourly Distribution of Accidents: ", time.taken)
 
 Gün içinde en yüksek kaza sıklığı, özellikle saat 7-8 arası ve 15-17 arasında gözlemlenmiştir. Bu saat dilimlerinde toplam kaza sayısının yüksek olmasının, yaklaşık olarak iş saatlerine denk gelmesi dikkat çekicidir. Bu saatlerde trafik yoğunluğunun artması, sürücülerin aceleyle hareket etmelerine ve kaza riskini artırmalarına neden olabilir. Proje kapsamında müşterilerin uyarılmasını gerektirecek veriler analiz edilirken bu grafikten de çıkarımlar yapılabilir.
 
+# Q7 : Sonuç değerlendirme, tavsiyeler
 
-```{r echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE, results='hide'}
+Proje genelinde yapılan operasyonlar, veri setinin temizlenmesi ve analiz edilmesi için kullanılan yöntemler açısından geçerlidir. Veri seti, eksik veya tutarsız verilerden temizlenmiştir. Analiz, doğru istatistiksel yöntemler kullanılarak gerçekleştirilmiştir.
+
+**Bulunan Sonuçlar**
+
+Bulunan sonuçlar, projenin ana problemini çözmeye yardımcı olacak önemli bilgiler sağlamaktadır. Örneğin, kazaların hangi yol özelliklerinde daha sık meydana geldiğini belirlemek, kazaları azaltmak için önlemler almak için değerli bilgiler sağlayabilir.
+
+Örneğin, trafik sinyali yakınlarında meydana gelen kazaların daha yaygın olduğunun belirlenmesi, trafik sinyali yakınlarında daha dikkatli sürüş eğitimi verilmesi gerektiği fikrini desteklemektedir.
+
+**Analiz ve Sonuçların Kuvvetli ve Zayıf Yönleri**
+
+Analiz ve sonuçların güçlü yönleri şunlardır:
+
+* Veri seti, eksik veya tutarsız verilerden temizlenmiştir.
+* Çok kapsamlı veriler üzerinde çalışılmıştır.
+* Analiz, doğru istatistiksel yöntemler kullanılarak gerçekleştirilmiştir.
+* Sonuçlar, projenin ana problemini çözmeye yardımcı olacak önemli bilgiler sağlamaktadır.
+
+Analiz ve sonuçların zayıf yönleri şunlardır:
+
+* Analizde müşteri veritabanı gibi gerçek şirket verileri de kullanılabilirdi ve daha tutarlı sonuçlar elde edilebilirdi.
+* Analiz, daha fazla istatistik ve grafik içerebilirdi. Elde edilen grafikler diğer verilerle de karşılaştırılıp daha kesin ve spesifik bilgiler elde edilebilirdi. Bu da müşteriler için planladığımız mobil uygulamada daha tutarlı ve yerinde analizler yaparak projenin başarı oranını artırabilirdi. Ancak zaman darlığı sebebiyle çok kapsamlı bir analiz yapılamadı.
+
+**Sonuç Olarak**
+
+Bu proje kapsamında, araç kazalarının trafik müdahalesi ile ilişkili faktörlerini anlamak için daha fazla bilgiye ve analize ihtiyaç olduğu sonucuna varılmıştır.
+
+Ayrıca, bu veri setindeki eksik değerlerin daha iyi tanımlanması gerekmektedir. Özellikle, değişkenlerde birçok NA değeri bulunmaktadır ve bu yüzden analize dahil bile edilmemişlerdir. 
+
+Bunun yanı sıra, araç kazalarının trafik müdahalesine neden olan diğer potansiyel faktörleri ve hangi faktörlerin en önemli olduğunu belirleme yöntemlerini daha ayrıntılı bir şekilde incelememiz gerekmektedir.
+
+Sonuç olarak, bu projenin bulgularının daha fazla araştırma ve detaylı analizlere dayanarak güçlendirilmesi, gelecekteki çalışmalara rehberlik etmesi önemlidir. Elde edilen sonuçlar, trafik güvenliği konusundaki stratejilerin daha etkili bir şekilde geliştirilmesi ve uygulanması için temel oluşturabilir ve bu haliyle bile müşterilerin daha az kazaya karışmasını sağlayacak veriler elde edilebilir. Yine de bunun dramatik bir fark yaratabilmesi için daha detaylı verilere ve analizlere ihtiyaç vardır.
+
+```{r echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE, results='hide'}
 library(testthat)
 
 source("testQ3.R")
